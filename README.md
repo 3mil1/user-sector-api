@@ -22,6 +22,11 @@ User Sector API is a Spring Boot application that allows users to create a profi
 - Docker
 - Docker Compose
 
+## Related Frontend
+
+The frontend for this application can be found at: 
+https://github.com/3mil1/user-sector-ui
+
 ## Setup and Running
 
 1. Create a `.env` file with database configuration
@@ -31,7 +36,7 @@ User Sector API is a Spring Boot application that allows users to create a profi
    POSTGRES_DB=usersector_db
    ```
 
-3. Run the application
+2. Run the application
    ```bash
    ./run.sh
    ```
