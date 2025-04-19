@@ -35,7 +35,7 @@ public class UserController {
     private final AuthenticationService authenticationService;
 
     @PostMapping
-    public ResponseEntity<Void> saveUserAndAuthenticate(@RequestBody @Valid UserDto userDto,
+    public ResponseEntity<UUID> saveUserAndAuthenticate(@RequestBody @Valid UserDto userDto,
             HttpServletRequest request, HttpServletResponse response) {
 
         UUID userId = userService.saveUser(userDto);
@@ -49,7 +49,7 @@ public class UserController {
                 .build()
                 .toUri();
 
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.created(location).body(userId);
     }
 
     @GetMapping("/current")

@@ -72,7 +72,7 @@ public class SectorServiceImpl implements SectorService {
                     .map(this::mapEntityToDtoWithChildren)
                     .collect(Collectors.toList());
 
-            dto.children().addAll(childrenDtos);
+            dto = dto.withAddedChildren(childrenDtos);
         }
 
         return dto;
