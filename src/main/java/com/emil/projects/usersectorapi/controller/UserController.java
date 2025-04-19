@@ -3,6 +3,7 @@ package com.emil.projects.usersectorapi.controller;
 import java.net.URI;
 import java.util.UUID;
 
+import com.emil.projects.usersectorapi.security.model.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -35,19 +36,14 @@ public class UserController {
     private final AuthenticationService authenticationService;
 
     @PostMapping
-    public ResponseEntity<UUID> saveUserAndAuthenticate(@RequestBody @Valid UserDto userDto,
-            HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<UUID> saveUserAndAuthenticate(@RequestBody @Valid UserDto userDto, HttpServletRequest request, HttpServletResponse response) {
 
         UUID userId = userService.saveUser(userDto);
         log.info("User saved with ID: {}", userId);
 
         authenticationService.authenticateUser(userId, request, response);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequestUri()
-                .path("/current")
-                .build()
-                .toUri();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/current").build().toUri();
 
         return ResponseEntity.created(location).body(userId);
     }
@@ -60,20 +56,18 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        UUID currentUserId = userDetails.getUserId();
 
-        UUID currentUserId = UUID.fromString(userDetails.getUsername());
         log.info("Fetching current user data for authenticated user ID: {}", currentUserId);
 
-        return userService.findById(currentUserId)
-                .map(userDto -> {
-                    log.debug("Current user found");
-                    return ResponseEntity.ok(userDto);
-                })
-                .orElseGet(() -> {
-                    log.error("Authenticated user with ID {} not found in database!", currentUserId);
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-                });
+        return userService.findById(currentUserId).map(userDto -> {
+            log.debug("Current user found");
+            return ResponseEntity.ok(userDto);
+        }).orElseGet(() -> {
+            log.error("Authenticated user with ID {} not found in database!", currentUserId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        });
     }
 
     @PutMapping

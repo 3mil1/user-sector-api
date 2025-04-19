@@ -2,6 +2,8 @@ package com.emil.projects.usersectorapi.security.service;
 
 import java.util.Collections;
 import java.util.UUID;
+
+import com.emil.projects.usersectorapi.security.model.CustomUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +27,8 @@ import com.emil.projects.usersectorapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.emil.projects.usersectorapi.constant.ApiConstants.*;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -38,7 +42,6 @@ public class AuthenticationService implements UserDetailsService {
     @Transactional(readOnly = true)
     @Cacheable(value = "userDetails", key = "#username")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
         UUID userId;
         try {
             userId = UUID.fromString(username);
@@ -50,22 +53,18 @@ public class AuthenticationService implements UserDetailsService {
         UserEntity user = userRepository.findByIdWithAll(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        var authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        var authorities = Collections.singletonList(new SimpleGrantedAuthority(ROLE_USER));
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getId().toString())
-                .password("{noop}")
-                .authorities(authorities)
-                .accountExpired(false)
-                .accountLocked(false)
-                .credentialsExpired(false)
-                .disabled(false)
-                .build();
+        return new CustomUserDetails(
+                user.getId(),
+                user.getName(),
+                authorities
+        );
     }
 
     public void authenticateUser(UUID userId,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+                                 HttpServletRequest request,
+                                 HttpServletResponse response) {
 
         UserDetails userDetails = loadUserByUsername(userId.toString());
 

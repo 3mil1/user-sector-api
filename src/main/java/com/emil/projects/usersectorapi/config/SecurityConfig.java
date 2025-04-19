@@ -26,83 +26,83 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
-        @Value("${cors.allowed-origins:http://localhost:5173}")
-        private List<String> corsAllowedOrigins;
+    @Value("${cors.allowed-origins:http://localhost:5173}")
+    private List<String> corsAllowedOrigins;
 
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-                CsrfTokenRequestAttributeHandler csrfAttrHandler = new CsrfTokenRequestAttributeHandler();
-                csrfAttrHandler.setCsrfRequestAttributeName("_csrf");
+        CsrfTokenRequestAttributeHandler csrfAttrHandler = new CsrfTokenRequestAttributeHandler();
+        csrfAttrHandler.setCsrfRequestAttributeName("_csrf");
 
-                http
-                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                                .csrf(csrf -> csrf
-                                                .csrfTokenRepository(csrfTokenRepository())
-                                                .csrfTokenRequestHandler(csrfAttrHandler))
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(csrfTokenRepository())
+                        .csrfTokenRequestHandler(csrfAttrHandler))
 
-                                .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                                .requestMatchers(HttpMethod.GET, "/api/sectors").permitAll()
-                                                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                                                .requestMatchers("/api/users/current").authenticated()
-                                                .requestMatchers(HttpMethod.PUT, "/api/users").authenticated()
-                                                .anyRequest().denyAll())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/sectors").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                        .requestMatchers("/api/users/current").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/users").authenticated()
+                        .anyRequest().denyAll())
 
-                                .sessionManagement(sess -> sess
-                                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                                                .sessionFixation().migrateSession()
-                                                .maximumSessions(1)
-                                                .maxSessionsPreventsLogin(false)
-                                                .sessionRegistry(sessionRegistry()))
+                .sessionManagement(sess -> sess
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionFixation().migrateSession()
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false)
+                        .sessionRegistry(sessionRegistry()))
 
-                                .headers(headers -> headers
-                                                .contentSecurityPolicy(
-                                                                csp -> csp.policyDirectives("default-src 'self'"))
-                                                .frameOptions(frame -> frame.sameOrigin()))
+                .headers(headers -> headers
+                        .contentSecurityPolicy(
+                                csp -> csp.policyDirectives("default-src 'self'"))
+                        .frameOptions(frame -> frame.sameOrigin()))
 
-                                .httpBasic(basic -> basic.disable())
-                                .formLogin(login -> login.disable());
+                .httpBasic(basic -> basic.disable())
+                .formLogin(login -> login.disable());
 
-                return http.build();
-        }
+        return http.build();
+    }
 
-        @Bean
-        public SessionRegistry sessionRegistry() {
-                return new SessionRegistryImpl();
-        }
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
 
-        @Bean
-        public SessionAuthenticationStrategy sessionAuthenticationStrategy(SessionRegistry registry) {
-                return new RegisterSessionAuthenticationStrategy(registry);
-        }
+    @Bean
+    public SessionAuthenticationStrategy sessionAuthenticationStrategy(SessionRegistry registry) {
+        return new RegisterSessionAuthenticationStrategy(registry);
+    }
 
-        @Bean
-        public HttpSessionSecurityContextRepository securityContextRepository() {
-                return new HttpSessionSecurityContextRepository();
-        }
+    @Bean
+    public HttpSessionSecurityContextRepository securityContextRepository() {
+        return new HttpSessionSecurityContextRepository();
+    }
 
-        @Bean
-        public CorsConfigurationSource corsConfigurationSource() {
-                CorsConfiguration cfg = new CorsConfiguration();
-                cfg.setAllowedOrigins(corsAllowedOrigins);
-                cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                cfg.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-XSRF-TOKEN"));
-                cfg.setExposedHeaders(Arrays.asList("Location"));
-                cfg.setAllowCredentials(true);
-                cfg.setMaxAge(3600L);
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowedOrigins(corsAllowedOrigins);
+        cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        cfg.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-XSRF-TOKEN"));
+        cfg.setExposedHeaders(Arrays.asList("Location"));
+        cfg.setAllowCredentials(true);
+        cfg.setMaxAge(3600L);
 
-                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-                source.registerCorsConfiguration("/api/**", cfg);
-                return source;
-        }
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", cfg);
+        return source;
+    }
 
-        @Bean
-        public CookieCsrfTokenRepository csrfTokenRepository() {
-                CookieCsrfTokenRepository repo = new CookieCsrfTokenRepository();
-                repo.setCookieName("XSRF-TOKEN");
-                repo.setCookiePath("/");
-                return repo;
-        }
+    @Bean
+    public CookieCsrfTokenRepository csrfTokenRepository() {
+        CookieCsrfTokenRepository repo = new CookieCsrfTokenRepository();
+        repo.setCookieName("XSRF-TOKEN");
+        repo.setCookiePath("/");
+        return repo;
+    }
 }
