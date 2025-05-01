@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +15,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = { "parent", "children", "users" })
+@ToString(exclude = {"parent", "children", "users"})
 @Entity
 @Table(name = "sectors")
 public class SectorEntity {
@@ -31,6 +32,7 @@ public class SectorEntity {
     private SectorEntity parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @BatchSize(size = 100)
     private Set<SectorEntity> children = new HashSet<>();
 
     @ManyToMany(mappedBy = "sectors", fetch = FetchType.LAZY)
